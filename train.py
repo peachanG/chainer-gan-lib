@@ -26,7 +26,6 @@ def main():
     parser.add_argument('--data_path', type=str, default="data/datasets/cifar10/train", help='dataset directory path')
     parser.add_argument('--class_name', '-class', type=str, default='all_class',
                         help='class name (default: all_class(str))')
-    parser.add_argument('--data_path', type=str, default="data/datasets/cifar10/train", help='dataset directory path')
     parser.add_argument('--algorithm', '-a', type=str, default="dcgan", help='GAN algorithm')
     parser.add_argument('--architecture', type=str, default="dcgan", help='Network architecture')
     parser.add_argument('--batchsize', type=int, default=64)

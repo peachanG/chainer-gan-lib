@@ -74,18 +74,19 @@ class ImageDataset(dataset_mixin.DatasetMixin):
         self.extensions = extensions
         self.classes = classes
         self.class_to_idx = class_to_idx
-        self._dtype = chainer.get_dtype(dtype)
+    #        self._dtype = chainer.get_dtype(dtype)
+        self._dtype = np.float32
         self._label_dtype = label_dtype
 
     def __len__(self):
-        return len(self.paths)
+        return len(self.pairs)
 
     def get_example(self, i):
         path, int_label = self.pairs[i]
         img = Image.open(path)
         img = image_to_np(img, self._dtype)
-        label = np.array(int_label, dtype=self._label_dtype)
-        return img, label
+#        label = np.array(int_label, dtype=self._label_dtype)
+        return img#, label
 
     def _make_dataset(self, dir, class_to_idx, extensions):
         images = []
