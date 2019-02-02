@@ -1,0 +1,16 @@
+*.json
+*.h5
+*.hdf5
+*.npz
+*.pickle
+
+.data
+.DS_Store
+__pycache__
+.ipynb_checkpoints
+
+data/*
+results/*/checkpoint
+dust
+jupyter_log
+nohup.out
