@@ -9,18 +9,24 @@ from chainer.training import extensions
 
 sys.path.append(os.path.dirname(__file__))
 
-from common.dataset import Cifar10Dataset
+from common.dataset import Cifar10Dataset, ImageDataset
 from common.evaluation import sample_generate, sample_generate_light, calc_inception, calc_FID
 from common.record import record_setting
 import common.net
+
 
 def make_optimizer(model, alpha, beta1, beta2):
     optimizer = chainer.optimizers.Adam(alpha=alpha, beta1=beta1, beta2=beta2)
     optimizer.setup(model)
     return optimizer
 
+
 def main():
     parser = argparse.ArgumentParser(description='Train script')
+    parser.add_argument('--data_path', type=str, default="data/datasets/cifar10/train", help='dataset directory path')
+    parser.add_argument('--class_name', '-class', type=str, default='all_class',
+                        help='class name (default: all_class(str))')
+    parser.add_argument('--data_path', type=str, default="data/datasets/cifar10/train", help='dataset directory path')
     parser.add_argument('--algorithm', '-a', type=str, default="dcgan", help='GAN algorithm')
     parser.add_argument('--architecture', type=str, default="dcgan", help='Network architecture')
     parser.add_argument('--batchsize', type=int, default=64)
@@ -43,7 +49,14 @@ def main():
     report_keys = ["loss_dis", "loss_gen", "inception_mean", "inception_std", "FID"]
 
     # Set up dataset
-    train_dataset = Cifar10Dataset()
+    if args.class_name == 'all_class':
+        data_path = args.data_path
+        one_class_flag = False
+    else:
+        data_path = os.path.join(args.data_path, args.class_name)
+        one_class_flag = True
+
+    train_dataset = ImageDataset(data_path, one_class_flag=one_class_flag)
     train_iter = chainer.iterators.SerialIterator(train_dataset, args.batchsize)
 
     # Setup algorithm specific networks and updaters
@@ -56,7 +69,7 @@ def main():
 
     if args.algorithm == "dcgan":
         from dcgan.updater import Updater
-        if args.architecture=="dcgan":
+        if args.architecture == "dcgan":
             generator = common.net.DCGANGenerator()
             discriminator = common.net.DCGANDiscriminator()
         else:
@@ -65,10 +78,10 @@ def main():
     elif args.algorithm == "stdgan":
         from stdgan.updater import Updater
         updater_args["n_dis"] = args.n_dis
-        if args.architecture=="dcgan":
+        if args.architecture == "dcgan":
             generator = common.net.DCGANGenerator()
             discriminator = common.net.DCGANDiscriminator()
-        elif args.architecture=="sndcgan":
+        elif args.architecture == "sndcgan":
             generator = common.net.DCGANGenerator()
             discriminator = common.net.SNDCGANDiscriminator()
         else:
@@ -77,7 +90,7 @@ def main():
     elif args.algorithm == "dfm":
         from dfm.net import Discriminator, Denoiser
         from dfm.updater import Updater
-        if args.architecture=="dcgan":
+        if args.architecture == "dcgan":
             generator = common.net.DCGANGenerator()
             discriminator = Discriminator()
             denoiser = Denoiser()
@@ -89,7 +102,7 @@ def main():
     elif args.algorithm == "minibatch_discrimination":
         from minibatch_discrimination.net import Discriminator
         from minibatch_discrimination.updater import Updater
-        if args.architecture=="dcgan":
+        if args.architecture == "dcgan":
             generator = common.net.DCGANGenerator()
             discriminator = Discriminator()
         else:
@@ -99,7 +112,7 @@ def main():
     elif args.algorithm == "began":
         from began.net import Discriminator
         from began.updater import Updater
-        if args.architecture=="dcgan":
+        if args.architecture == "dcgan":
             generator = common.net.DCGANGenerator(use_bn=False)
             discriminator = Discriminator()
         else:
@@ -111,7 +124,7 @@ def main():
 
     elif args.algorithm == "cramer":
         from cramer.updater import Updater
-        if args.architecture=="dcgan":
+        if args.architecture == "dcgan":
             generator = common.net.DCGANGenerator()
             discriminator = common.net.WGANDiscriminator(output_dim=args.output_dim)
         else:
@@ -123,7 +136,7 @@ def main():
 
     elif args.algorithm == "dragan":
         from dragan.updater import Updater
-        if args.architecture=="dcgan":
+        if args.architecture == "dcgan":
             generator = common.net.DCGANGenerator()
             discriminator = common.net.WGANDiscriminator()
         else:
@@ -135,7 +148,7 @@ def main():
 
     elif args.algorithm == "wgan_gp":
         from wgan_gp.updater import Updater
-        if args.architecture=="dcgan":
+        if args.architecture == "dcgan":
             generator = common.net.DCGANGenerator()
             discriminator = common.net.WGANDiscriminator()
         else:
@@ -147,7 +160,6 @@ def main():
 
     else:
         raise NotImplementedError()
-
 
     if args.gpu >= 0:
         chainer.cuda.get_device_from_id(args.gpu).use()
