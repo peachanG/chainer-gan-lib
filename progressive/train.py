@@ -10,7 +10,7 @@ from chainer.training import extensions
 sys.path.append(os.path.dirname(__file__))
 sys.path.append(os.path.abspath(os.path.dirname(__file__)) + os.path.sep + os.path.pardir)
 
-from common.dataset import Cifar10Dataset
+from common.dataset import Cifar10Dataset, ImageDataset
 from evaluation import sample_generate, sample_generate_light, calc_inception, calc_FID
 from common.record import record_setting
 
@@ -50,9 +50,15 @@ except:
     print("    (reinstall chainer")
     exit(0)
 
+
 def main():
     parser = argparse.ArgumentParser(
         description='Train script')
+    parser.add_argument('--data_path', type=str, default="data/datasets/cifar10/train", help='dataset directory path')
+    parser.add_argument('--class_name', '-class', type=str, default='all_class',
+                        help='class name (default: all_class(str))')
+    parser.add_argument('--num_workers', type=int, default=4,
+                        help='number of parallel data loading processes')
     parser.add_argument('--batchsize', '-b', type=int, default=16)
     parser.add_argument('--max_iter', '-m', type=int, default=400000)
     parser.add_argument('--gpu', '-g', type=int, default=0,
@@ -118,8 +124,16 @@ def main():
     opt_gen = make_optimizer(generator)
     opt_dis = make_optimizer(discriminator)
 
-    train_dataset = Cifar10Dataset()
-    train_iter = chainer.iterators.SerialIterator(train_dataset, args.batchsize)
+    if args.class_name == 'all_class':
+        data_path = args.data_path
+        one_class_flag = False
+    else:
+        data_path = os.path.join(args.data_path, args.class_name)
+        one_class_flag = True
+
+    train_dataset = ImageDataset(data_path, one_class_flag=one_class_flag)
+    train_iter = chainer.iterators.MultiprocessIterator(
+        train_dataset, args.batchsize, n_processes=args.num_workers)
 
     # Set up a trainer
     updater = Updater(

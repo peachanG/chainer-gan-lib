@@ -26,6 +26,8 @@ def main():
     parser.add_argument('--data_path', type=str, default="data/datasets/cifar10/train", help='dataset directory path')
     parser.add_argument('--class_name', '-class', type=str, default='all_class',
                         help='class name (default: all_class(str))')
+    parser.add_argument('--num_workers', type=int, default=4,
+                        help='number of parallel data loading processes')
     parser.add_argument('--algorithm', '-a', type=str, default="dcgan", help='GAN algorithm')
     parser.add_argument('--architecture', type=str, default="dcgan", help='Network architecture')
     parser.add_argument('--batchsize', type=int, default=64)
@@ -56,8 +58,8 @@ def main():
         one_class_flag = True
 
     train_dataset = ImageDataset(data_path, one_class_flag=one_class_flag)
-    train_iter = chainer.iterators.SerialIterator(train_dataset, args.batchsize)
-
+    train_iter = chainer.iterators.MultiprocessIterator(
+        train_dataset, args.batchsize, n_processes=args.num_workers)
     # Setup algorithm specific networks and updaters
     models = []
     opts = {}
