@@ -1,3 +1,0 @@
-[submodule "common/inception"]
-	path = common/inception
-	url = https://github.com/mattya/chainer-inception-score.git
