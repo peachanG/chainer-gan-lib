@@ -60,18 +60,18 @@ def main():
     parser.add_argument('--num_workers', type=int, default=4,
                         help='number of parallel data loading processes')
     parser.add_argument('--batchsize', '-b', type=int, default=16)
-    parser.add_argument('--max_iter', '-m', type=int, default=400000)
+    parser.add_argument('--max_iter', '-m', type=int, default=40000)
     parser.add_argument('--gpu', '-g', type=int, default=0,
                         help='GPU ID (negative value indicates CPU)')
     parser.add_argument('--out', '-o', default='result',
                         help='Directory to output the result')
-    parser.add_argument('--snapshot_interval', type=int, default=25000,
+    parser.add_argument('--snapshot_interval', type=int, default=2500,
                         help='Interval of snapshot')
-    parser.add_argument('--evaluation_interval', type=int, default=50000,
+    parser.add_argument('--evaluation_interval', type=int, default=5000,
                         help='Interval of evaluation')
-    parser.add_argument('--out_image_interval', type=int, default=12500,
+    parser.add_argument('--out_image_interval', type=int, default=1250,
                         help='Interval of evaluation')
-    parser.add_argument('--stage_interval', type=int, default=400000,
+    parser.add_argument('--stage_interval', type=int, default=40000,
                         help='Interval of stage progress')
     parser.add_argument('--display_interval', type=int, default=100,
                         help='Interval of displaying log to console')
